@@ -28,11 +28,13 @@ New-PSTask -Name "Parent task" -ScriptBlock {
 
 ## Set the visual mode:
 - Available modes:
-  - Spinner (default mode)
-  - Text
-  - Verbose
-  - Silent
-- 
+  - Spinner (default mode) - Shows a spinning indicator to visualize each task is running. If the task succeeds it will turn green with an '[OK]' in front of it. If it fails it will turn red with an 'X'.
+  - Text - Shows each task name plainly without any spinners or progress indicators. Also does not show whether it succeeded or failed. Useful if having issues with Spinner mode.
+  - Verbose - Shows each task name as a Write-Verbose message. Will not be visible unless -Verbose is used.
+  - Silent - No console output whatsoever.
+- All modes will log to file if logging is initialized.
+- Spinner is the primary mode of the module, but other modes can be useful if running scripts non-interactively without the need to update the script to remove output messages
+
 ```
 Set-PSTaskMode -Mode Slient
 ```
@@ -54,18 +56,22 @@ Set-PSTaskVisibilityLevel -VisibilityLevel Debug
 -----
 
 ## Log PSTasks
-- Initialize logging with `Start-PSTaskLogger` or just specify a LogName with `New-PSTask` to create a log file with a header
+- Initialize logging with `Start-PSTaskLogging` or just specify a LogName with `New-PSTask` to create a log file with a header
 - Each subsequent PSTask will be logged under the currently initialized log file until the script ends (this includes nested PSTasks)
 - Will prepend the date and time to the specified LogName
 - If no LogPath is set then it will use the DefaultLogPath set in the module's config/main.psd1 file.
 - PSTask should automatically clear the current log folder so a new task can be ran, but you can explicitly clear it and reset the logging state with `Stop-PSTaskLogging`
   
 ```
-Start-PSTaskLogger -LogName "NewUserScript" -LogPath "C:\logs"
+Start-PSTaskLogging -LogName "NewUserScript" -LogPath "C:\logs"
 ```
 or
 ```
 New-PSTask -Name "Initializing Logging" -LogName "NewUserScript" -LogPath "C:\logs" -ScriptBlock { }
+```
+Stop Logging
+```
+Stop-PSTaskLogging
 ```
 -----
 
