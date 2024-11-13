@@ -1,11 +1,11 @@
-function Invoke-VerboseTask {
+function Invoke-NormalTask {
     <#
     .SYNOPSIS
-    Executes a task with verbose output.
+    Executes a task with normal PowerShell output behavior.
 
     .DESCRIPTION
-    The Invoke-VerboseTask function runs a given script block and outputs the results using Write-Verbose.
-    It also handles logging of the task's progress and any errors that occur.
+    The Invoke-NormalTask function runs a given script block and allows output to flow normally to the console,
+    maintaining standard PowerShell output behavior while still providing task tracking and logging capabilities.
 
     .PARAMETER Name
     The name of the task to be executed.
@@ -19,32 +19,34 @@ function Invoke-VerboseTask {
         [string]$Name,
         [scriptblock]$ScriptBlock
     )
-
+    
     process {
         Add-PSTaskLog "TASK START - $Name"
-        Write-Verbose "Starting task: $Name"
         try {
+            # Execute the script block and capture output
             $output = . $ScriptBlock *>&1
+            
+            # Process each output item
             $output | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) {
                     $fullErrorMessage = Format-ErrorForLog $_
                     Add-PSTaskLog $fullErrorMessage -Level "ERROR"
-                    Write-Verbose "ERROR: $($_.Exception.Message)"
+                    # Write error to error stream
+                    $_ | Write-Error
                 } else {
                     Add-PSTaskLog $_.ToString()
-                    Write-Verbose $_
+                    # Write output to output stream
+                    $_
                 }
             }
-            Write-Verbose "Task completed successfully: $Name"
+            
             Add-PSTaskLog "TASK END - $Name - Success"
         }
         catch {
             $fullErrorMessage = Format-ErrorForLog $_
-            Write-Verbose "Task failed: $Name"
-            Write-Verbose $_.Exception.Message
             Add-PSTaskLog $fullErrorMessage -Level "ERROR"
             Add-PSTaskLog "TASK END - $Name - Failure"
-            throw
+            throw  # Re-throw the error to maintain normal PowerShell error handling
         }
     }
 }
