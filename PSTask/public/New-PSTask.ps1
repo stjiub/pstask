@@ -76,7 +76,7 @@ function New-PSTask {
         [scriptblock]$ScriptBlock,
         
         [Parameter(Mandatory = $false)]
-        [ValidateSet("Spinner", "Text", "Verbose", "Silent", "Normal")]
+        [ValidateSet("Spinner", "Text", "Silent", "Normal")]
         [string]$Mode = $script:PSTaskMode,
 
         [Parameter(Mandatory = $false)]
