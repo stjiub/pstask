@@ -10,15 +10,15 @@
     To permanently change the default PSTask output mode, refer to the main.psd1 config file.
 
     .PARAMETER Mode
-    The PSTask output mode to set. Valid options are "Silent", "Text", "Verbose", and "Spinner".
+    The PSTask output mode to set. Valid options are "Silent", "Text", "Normal", and "Spinner".
 
     .EXAMPLE
     Set-PSTaskMode -Mode "Silent"
     # This example sets the PSTask output mode to Silent for the current session.
 
     .EXAMPLE
-    Set-PSTaskMode -Mode "Verbose"
-    # This example sets the PSTask output mode to Verbose for the current session.
+    Set-PSTaskMode -Mode "Normal"
+    # This example sets the PSTask output mode to Normal for the current session.
 
     .NOTES
     The function uses a script-scoped variable $script:PSTaskMode to store the mode. 
@@ -33,7 +33,7 @@
     [cmdletbinding()]
     param (
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Silent","Text","Verbose","Spinner")]
+        [ValidateSet("Silent","Text","Normal","Spinner")]
         [string]$Mode
     )
 

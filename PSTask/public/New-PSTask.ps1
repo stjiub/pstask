@@ -76,8 +76,8 @@ function New-PSTask {
         [scriptblock]$ScriptBlock,
         
         [Parameter(Mandatory = $false)]
-        [ValidateSet("Spinner", "Text", "Verbose", "Silent")]
-        [string]$Mode = $script:Config.DefaultMode,
+        [ValidateSet("Spinner", "Text", "Verbose", "Silent", "Normal")]
+        [string]$Mode = $script:PSTaskMode,
 
         [Parameter(Mandatory = $false)]
         [PSTaskVisibilityLevel]$VisibilityLevel = [PSTaskVisibilityLevel]::Normal,
@@ -116,7 +116,7 @@ function New-PSTask {
                     Invoke-SpinnerTask -Name $Name -ScriptBlock $ScriptBlock -Indent $indent
                 }
                 "Text" { Invoke-TextTask -Name $Name -ScriptBlock $ScriptBlock }
-                "Verbose" { Invoke-VerboseTask -Name $Name -ScriptBlock $ScriptBlock }
+                "Normal" { Invoke-NormalTask -Name $Name -ScriptBlock $ScriptBlock }
                 "Silent" { Invoke-SilentTask -Name $Name -ScriptBlock $ScriptBlock }
             }
         }
