@@ -24,7 +24,9 @@ Export-ModuleMember -Function $Public.Basename
 Add-Type -Path "$($script:ModuleClassFolder)\ConsoleBufferWriter.cs"
 
 # Initialize script vars
-$script:PSTaskJobs = [System.Collections.Concurrent.ConcurrentBag[hashtable]]::new()
+$script:PSTaskJobs = [hashtable]::Synchronized(@{
+    Tasks = @{}
+})
 $script:PSTaskLoggingState = @{
     IsLogging = $false
     LogPath = $null
