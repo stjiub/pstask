@@ -118,7 +118,7 @@ PrivateData = @{
         # RequireLicenseAcceptance = $false
 
         # External dependent modules of this module
-        # ExternalModuleDependencies = @()
+        ExternalModuleDependencies = @("ThreadJob")
 
     } # End of PSData hashtable
 
