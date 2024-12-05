@@ -9,8 +9,10 @@ properties {
     
     $public  = @(Get-ChildItem -Path "$moduleRoot\public\" -include '*.ps1' -recurse -ErrorAction SilentlyContinue)
     $private = @(Get-ChildItem -Path "$moduleRoot\private\" -include '*.ps1' -recurse -ErrorAction SilentlyContinue)
-}
 
+    $intuneAppRootPath = "\\server\share\intune\apps"
+    $appNames = @("App1", "App2")
+}
 
 task default -depends Analyze
 
@@ -93,6 +95,27 @@ task default -depends Analyze
         }
 
         Publish-Module -Path $tempDir -Repository $repoName
+
+        # Copy signed version to intune app folders
+        foreach ($appName in $appNames) {
+            $intuneAppPath = "$intuneAppRootPath\$appName\$moduleName"
+            try {
+                if (Test-Path $intuneAppPath) {
+                    Write-Warning "Removing old Intune App version of $moduleName"
+                    Remove-Item -Path $intuneAppPath -Recurse -Force
+                }
+                Write-Warning "Copying new version of $moduleName to Intune App $appName"
+                Copy-Item -Path $tempDir -Destination $intuneAppPath -Recurse
+
+                Write-Warning "Building new IntuneWin file for Intune app $appName"
+                Set-Location $intuneAppRootPath
+                & .\makeapp.ps1 .\$appName
+            }
+            catch {
+                Write-Error "Failed to update the Intune App package for $appName. Please update manually"
+            }
+        }
+
         Remove-Item -Path $tempDir -Recurse -Force
         Update-Module -Name $moduleName
     }
