@@ -11,7 +11,7 @@ properties {
     $private = @(Get-ChildItem -Path "$moduleRoot\private\" -include '*.ps1' -recurse -ErrorAction SilentlyContinue)
 
     $intuneAppRootPath = "\\esd189.org\dfs\wpkg\AdminScripts\intune\apps"
-    $appNames = @("BaseInstall", "nwesd-pc")
+    $appNames = @("BaseInstall")
 }
 
 task default -depends Analyze
