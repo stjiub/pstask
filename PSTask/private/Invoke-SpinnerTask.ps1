@@ -26,20 +26,20 @@ function Invoke-SpinnerTask {
         [Parameter(Mandatory = $false)]
         [int]$Indent = 0
     )
-   
+
     process {
         Add-PSTaskLog "TASK START - $Name"
-       
+
         # Save current cursor state
         $originalCursorVisible = [Console]::CursorVisible
         [Console]::CursorVisible = $false
-       
+
         # Get current cursor position
         $taskPosition = $Host.UI.RawUI.CursorPosition
-       
+
         # Generate unique ID for this task
         $taskId = [Guid]::NewGuid().ToString()
-       
+
         # Initialize task state in synchronized hashtable
         $script:PSTaskJobs.Tasks[$taskId] = @{
             Active = $true
@@ -49,15 +49,15 @@ function Invoke-SpinnerTask {
             }
             Name = $Name
         }
-       
+
         try {
             # Write initial task name
             Write-TaskName -Name $Name -Indent $Indent
-           
+
             # Move cursor down one line for output
             $newY = $Host.UI.RawUI.CursorPosition.Y + 1
             [Console]::SetCursorPosition(0, $newY)
-           
+
             # Start spinner in background job
             $spinnerJob = Start-ThreadJob -Name "PSTask_$taskId" -ScriptBlock {
                 param($taskId, $scroll, $delay, $color, $jobs)
@@ -80,50 +80,57 @@ function Invoke-SpinnerTask {
                     Add-PSTaskLog "Spinner update error: $_" -Level "ERROR"
                 }
             } -ArgumentList $taskId, $script:Config.Spinner.Chars, 
-                           $script:Config.Spinner.Delay, 
-                           $script:Config.Spinner.Color,
-                           $script:PSTaskJobs
-           
+                            $script:Config.Spinner.Delay, 
+                            $script:Config.Spinner.Color,
+                            $script:PSTaskJobs
+
             # Execute main task
             $output = . $ScriptBlock *>&1
-           
-            # Process output
-            $output | ForEach-Object {
+
+            # Process output with null check and string validation
+            $output | Where-Object { $_ -ne $null } | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) {
                     $fullErrorMessage = Format-ErrorForLog $_
-                    Add-PSTaskLog $fullErrorMessage -Level "ERROR"
+                    if (![string]::IsNullOrWhiteSpace($fullErrorMessage)) {
+                        Add-PSTaskLog $fullErrorMessage -Level "ERROR"
+                    }
                 }
                 else {
-                    Add-PSTaskLog $_.ToString()
+                    $message = $_.ToString()
+                    if (![string]::IsNullOrWhiteSpace($message)) {
+                        Add-PSTaskLog $message
+                    }
                 }
             }
-           
+            
             $status = "Success"
         }
         catch {
             $status = "Failure"
             $fullErrorMessage = Format-ErrorForLog $_
-            Add-PSTaskLog $fullErrorMessage -Level "ERROR"
+            if (![string]::IsNullOrWhiteSpace($fullErrorMessage)) {
+                Add-PSTaskLog $fullErrorMessage -Level "ERROR"
+            }
         }
         finally {
             # Mark task as inactive
             $script:PSTaskJobs.Tasks[$taskId].Active = $false
-           
+
             # Clean up spinner job
             if ($spinnerJob) {
                 Stop-Job -Job $spinnerJob -ErrorAction SilentlyContinue
                 Remove-Job -Job $spinnerJob -ErrorAction SilentlyContinue
             }
-           
+
             # Write final status
             Write-FinalStatus -Name $Name -Status $status -Indent $Indent
-           
+
             # Remove task from collection
             $script:PSTaskJobs.Tasks.Remove($taskId)
-           
+
             # Restore cursor visibility
             [Console]::CursorVisible = $originalCursorVisible
-           
+
             Add-PSTaskLog "TASK END - $Name - $status"
         }
     }
