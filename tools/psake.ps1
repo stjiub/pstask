@@ -11,7 +11,7 @@ properties {
     $private = @(Get-ChildItem -Path "$moduleRoot\private\" -include '*.ps1' -recurse -ErrorAction SilentlyContinue)
 
     $intuneAppRootPath = "\\server\share\intune\apps"
-    $appNames = @("App1", "App2")
+    $appNames = @("App1")
 }
 
 task default -depends Analyze
