@@ -73,10 +73,3 @@ Stop Logging
 ```
 Stop-PSTaskLogging
 ```
------
-
-## Generate a report from the log
-- Output the report either as an object or in a console readable way.
-```
-Get-PSTaskReport -LogFilePath "C:\logs\NewUserScript.log" -Format "Console"
-```
