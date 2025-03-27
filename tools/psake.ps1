@@ -101,7 +101,7 @@ task default -depends Analyze
             $intuneAppPath = "$intuneAppRootPath\$appName\$moduleName"
             try {
                 if (Test-Path $intuneAppPath) {
-                    Write-Warning "Removing old Intune App version of $moduleName"
+                    Write-Warning "Removing old version of module from Intune App $appName"
                     Remove-Item -Path $intuneAppPath -Recurse -Force
                 }
                 Write-Warning "Copying new version of $moduleName to Intune App $appName"
@@ -115,6 +115,8 @@ task default -depends Analyze
                 Write-Error "Failed to update the Intune App package for $appName. Please update manually"
             }
         }
+
+        Write-Warning "Be sure to upload any updated Intunewin files to the corresponding Intune App and update its detection version if needed!"
 
         Remove-Item -Path $tempDir -Recurse -Force
         Update-Module -Name $moduleName
