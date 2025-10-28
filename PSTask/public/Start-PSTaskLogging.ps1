@@ -13,6 +13,9 @@ function Start-PSTaskLogging {
     .PARAMETER LogPath
     An optional custom path for the log file. If not specified, the function will use the default log path from the script configuration or the current location.
 
+    .PARAMETER LogPathOverride
+    An optional full path (including filename) for the log file. When specified, this overrides PSTask's internal file naming logic and uses the exact path provided. Cannot be used together with LogPath.
+
     .PARAMETER CustomFields
     A hashtable of custom fields to be added to the log header. This allows for additional context or metadata to be included in the log.
 
@@ -23,6 +26,10 @@ function Start-PSTaskLogging {
     .EXAMPLE
     Start-PSTaskLogging -LogName "MyScript" -LogPath "C:\Logs" -CustomFields @{Version="1.0"; Environment="Production"}
     # This initializes logging for "MyScript" in the specified path with custom fields for version and environment.
+
+    .EXAMPLE
+    Start-PSTaskLogging -LogName "MyScript" -LogPathOverride "C:\Logs\CustomLog.log"
+    # This initializes logging for "MyScript" using the exact file path specified, bypassing the automatic filename generation.
 
     .NOTES
     The function uses script-scoped variables ($script:PSTaskLoggingState and $script:Config) to manage logging state and configuration. Ensure these are properly initialized before calling this function.
@@ -41,6 +48,8 @@ function Start-PSTaskLogging {
         [Parameter(Mandatory=$false)]
         [string]$LogPath,
         [Parameter(Mandatory=$false)]
+        [string]$LogPathOverride,
+        [Parameter(Mandatory=$false)]
         [hashtable]$CustomFields
     )
 
@@ -51,16 +60,27 @@ function Start-PSTaskLogging {
             return
         }
 
-        $newLogName = Get-PSTaskLogFileName -LogName $LogName
-
-        if ((-not $LogPath) -and ($script:Config.Logging.DefaultLogPath)) {
-            $LogPath = Join-Path $script:Config.Logging.DefaultLogPath $newLogName
+        # Validate that LogPath and LogPathOverride are not both specified
+        if ($LogPath -and $LogPathOverride) {
+            throw "Cannot specify both LogPath and LogPathOverride parameters. Use LogPathOverride to specify the complete file path, or LogPath to specify only the directory."
         }
-        elseif (-not $LogPath) {
-            $LogPath = Join-Path (Get-Location).Path $newLogName
+
+        # Use LogPathOverride if specified, otherwise use the existing logic
+        if ($LogPathOverride) {
+            $LogPath = $LogPathOverride
         }
         else {
-            $LogPath = Join-Path $LogPath $newLogName
+            $newLogName = Get-PSTaskLogFileName -LogName $LogName
+
+            if ((-not $LogPath) -and ($script:Config.Logging.DefaultLogPath)) {
+                $LogPath = Join-Path $script:Config.Logging.DefaultLogPath $newLogName
+            }
+            elseif (-not $LogPath) {
+                $LogPath = Join-Path (Get-Location).Path $newLogName
+            }
+            else {
+                $LogPath = Join-Path $LogPath $newLogName
+            }
         }
 
         $script:PSTaskLoggingState.IsLogging = $true
