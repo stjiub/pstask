@@ -87,10 +87,36 @@ function Start-PSTaskLogging {
         $script:PSTaskLoggingState.LogPath = $LogPath
         $script:PSTaskLoggingState.ReferenceCount = 1
 
+        # Collect system information
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-        $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-        $customFieldsString = if ($CustomFields) { $CustomFields.GetEnumerator() | ForEach-Object { "$($_.Key): $($_.Value)" } | Out-String } else { "" }
-        $header = $script:Config.Logging.LogHeaderFormat -f $LogName, $timestamp, $user, $LogPath, $customFieldsString
+        $currentIdentity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+        $user = $currentIdentity.Name
+        $runAsUser = $currentIdentity.Name  # In most cases this is the same unless impersonating
+        $machineName = $env:COMPUTERNAME
+        $osVersion = [System.Environment]::OSVersion.VersionString
+        $hostApp = $Host.Name
+        if ($MyInvocation.PSCommandPath) {
+            $hostApp = $MyInvocation.PSCommandPath
+        } elseif ($Host.Name -eq "ConsoleHost") {
+            $hostApp = (Get-Process -Id $PID).Path
+        }
+        $processId = $PID
+        $psVersion = if ($PSVersionTable.PSVersion) { $PSVersionTable.PSVersion.ToString() } else { "N/A" }
+        $psEdition = if ($PSVersionTable.PSEdition) { $PSVersionTable.PSEdition } else { "Desktop" }
+        $psCompatibleVersions = if ($PSVersionTable.PSCompatibleVersions) { $PSVersionTable.PSCompatibleVersions -join ", " } else { "N/A" }
+        $buildVersion = if ($PSVersionTable.BuildVersion) { $PSVersionTable.BuildVersion.ToString() } else { "N/A" }
+        $clrVersion = if ($PSVersionTable.CLRVersion) { $PSVersionTable.CLRVersion.ToString() } else { "N/A" }
+        $wsManStackVersion = if ($PSVersionTable.WSManStackVersion) { $PSVersionTable.WSManStackVersion.ToString() } else { "N/A" }
+        $psRemotingProtocolVersion = if ($PSVersionTable.PSRemotingProtocolVersion) { $PSVersionTable.PSRemotingProtocolVersion.ToString() } else { "N/A" }
+        $serializationVersion = if ($PSVersionTable.SerializationVersion) { $PSVersionTable.SerializationVersion.ToString() } else { "N/A" }
+
+        # Format custom fields if provided
+        $customFieldsString = ""
+        if ($CustomFields) {
+            $customFieldsString = ($CustomFields.GetEnumerator() | ForEach-Object { "$($_.Key): $($_.Value)`n" }) -join ""
+        }
+
+        $header = $script:Config.Logging.LogHeaderFormat -f $timestamp, $LogName, $user, $runAsUser, $machineName, $osVersion, $hostApp, $processId, $psVersion, $psEdition, $psCompatibleVersions, $buildVersion, $clrVersion, $wsManStackVersion, $psRemotingProtocolVersion, $serializationVersion, $customFieldsString
         $header | Out-File -FilePath $LogPath -Append
         Write-Verbose "Logging initialized. Log file: $($script:PSTaskLoggingState.LogPath)"
     }
