@@ -21,7 +21,7 @@ function Invoke-TextTask {
     )
 
     process {
-        Add-PSTaskLog "TASK START - $Name"
+        Write-PSTaskLog "TASK START - $Name"
 
         Write-Host "- $Name" -ForegroundColor $script:Config.DefaultColor
         try {
@@ -29,22 +29,22 @@ function Invoke-TextTask {
             $output | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) {
                     $fullErrorMessage = Format-ErrorForLog $_
-                    Add-PSTaskLog $fullErrorMessage -Level "ERROR"
+                    Write-PSTaskLog $fullErrorMessage -Level "ERROR"
                     Write-Host $_.Exception.Message -ForegroundColor $script:Config.StatusColors.Failure
                 } else {
-                    Add-PSTaskLog $_.ToString()
+                    Write-PSTaskLog $_.ToString()
                     Write-Host $_
                 }
             }
             Write-Host "[OK] $Name" -ForegroundColor $script:Config.StatusColors.Success
-            Add-PSTaskLog "TASK END - $Name - Success"
+            Write-PSTaskLog "TASK END - $Name - Success"
         }
         catch {
             $fullErrorMessage = Format-ErrorForLog $_
             Write-Host "X $Name" -ForegroundColor $script:Config.StatusColors.Failure
             Write-Host $_.Exception.Message -ForegroundColor $script:Config.StatusColors.Failure
-            Add-PSTaskLog $fullErrorMessage -Level "ERROR"
-            Add-PSTaskLog "TASK END - $Name - Failure"
+            Write-PSTaskLog $fullErrorMessage -Level "ERROR"
+            Write-PSTaskLog "TASK END - $Name - Failure"
         }
     }
 }

@@ -1,10 +1,10 @@
-function Add-PSTaskLog {
+function Write-PSTaskLog {
     <#
     .SYNOPSIS
-    Adds a log entry to the PSTask log file.
+    Writes a log entry to the PSTask log file.
 
     .DESCRIPTION
-    The Add-PSTaskLog function writes a new entry to the PSTask log file with a timestamp and specified log level.
+    The Write-PSTaskLog function writes a new entry to the PSTask log file with a timestamp and specified log level.
 
     .PARAMETER Message
     The message to be logged.

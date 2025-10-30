@@ -28,7 +28,7 @@ function Invoke-SpinnerTask {
     )
 
     process {
-        Add-PSTaskLog "TASK START - $Name"
+        Write-PSTaskLog "TASK START - $Name"
 
         # Save current cursor state
         $originalCursorVisible = [Console]::CursorVisible
@@ -77,7 +77,7 @@ function Invoke-SpinnerTask {
                 }
                 catch {
                     # Log error but don't throw
-                    Add-PSTaskLog "Spinner update error: $_" -Level "ERROR"
+                    Write-PSTaskLog "Spinner update error: $_" -Level "ERROR"
                 }
             } -ArgumentList $taskId, $script:Config.Spinner.Chars, 
                             $script:Config.Spinner.Delay, 
@@ -92,13 +92,13 @@ function Invoke-SpinnerTask {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) {
                     $fullErrorMessage = Format-ErrorForLog $_
                     if (![string]::IsNullOrWhiteSpace($fullErrorMessage)) {
-                        Add-PSTaskLog $fullErrorMessage -Level "ERROR"
+                        Write-PSTaskLog $fullErrorMessage -Level "ERROR"
                     }
                 }
                 else {
                     $message = $_.ToString()
                     if (![string]::IsNullOrWhiteSpace($message)) {
-                        Add-PSTaskLog $message
+                        Write-PSTaskLog $message
                     }
                 }
             }
@@ -109,7 +109,7 @@ function Invoke-SpinnerTask {
             $status = "Failure"
             $fullErrorMessage = Format-ErrorForLog $_
             if (![string]::IsNullOrWhiteSpace($fullErrorMessage)) {
-                Add-PSTaskLog $fullErrorMessage -Level "ERROR"
+                Write-PSTaskLog $fullErrorMessage -Level "ERROR"
             }
         }
         finally {
@@ -131,7 +131,7 @@ function Invoke-SpinnerTask {
             # Restore cursor visibility
             [Console]::CursorVisible = $originalCursorVisible
 
-            Add-PSTaskLog "TASK END - $Name - $status"
+            Write-PSTaskLog "TASK END - $Name - $status"
         }
     }
 }
