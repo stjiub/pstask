@@ -21,23 +21,23 @@ function Invoke-SilentTask {
     )
 
     process {
-        Add-PSTaskLog "TASK START - $Name"
+        Write-PSTaskLog "TASK START - $Name"
         try {
             $output = . $ScriptBlock *>&1
             $output | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) {
                     $fullErrorMessage = Format-ErrorForLog $_
-                    Add-PSTaskLog $fullErrorMessage -Level "ERROR"
+                    Write-PSTaskLog $fullErrorMessage -Level "ERROR"
                 } else {
-                    Add-PSTaskLog $_.ToString()
+                    Write-PSTaskLog $_.ToString()
                 }
             }
-            Add-PSTaskLog "TASK END - $Name - Success"
+            Write-PSTaskLog "TASK END - $Name - Success"
         }
         catch {
             $fullErrorMessage = Format-ErrorForLog $_
-            Add-PSTaskLog $fullErrorMessage -Level "ERROR"
-            Add-PSTaskLog "TASK END - $Name - Failure"
+            Write-PSTaskLog $fullErrorMessage -Level "ERROR"
+            Write-PSTaskLog "TASK END - $Name - Failure"
             throw
         }
     }

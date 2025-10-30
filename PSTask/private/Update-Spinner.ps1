@@ -66,7 +66,7 @@ function Update-Spinner {
         }
         catch {
             # Log error but don't throw to avoid breaking the main task
-            Add-PSTaskLog "Spinner update error: $_" -Level "ERROR"
+            Write-PSTaskLog "Spinner update error: $_" -Level "ERROR"
         }
     }
 }
