@@ -45,10 +45,13 @@ function Start-PSTaskLogging {
     param(
         [Parameter(Mandatory=$true)]
         [string]$LogName,
+
         [Parameter(Mandatory=$false)]
         [string]$LogPath,
+
         [Parameter(Mandatory=$false)]
         [string]$LogPathOverride,
+        
         [Parameter(Mandatory=$false)]
         [hashtable]$CustomFields
     )
@@ -102,7 +105,7 @@ function Start-PSTaskLogging {
         }
         $processId = $PID
         $psVersion = if ($PSVersionTable.PSVersion) { $PSVersionTable.PSVersion.ToString() } else { "N/A" }
-        $psEdition = if ($PSVersionTable.PSEdition) { $PSVersionTable.PSEdition } else { "Desktop" }
+        $edition = if ($PSVersionTable.PSEdition) { $PSVersionTable.PSEdition } else { "Desktop" }
         $psCompatibleVersions = if ($PSVersionTable.PSCompatibleVersions) { $PSVersionTable.PSCompatibleVersions -join ", " } else { "N/A" }
         $buildVersion = if ($PSVersionTable.BuildVersion) { $PSVersionTable.BuildVersion.ToString() } else { "N/A" }
         $clrVersion = if ($PSVersionTable.CLRVersion) { $PSVersionTable.CLRVersion.ToString() } else { "N/A" }
@@ -116,7 +119,7 @@ function Start-PSTaskLogging {
             $customFieldsString = ($CustomFields.GetEnumerator() | ForEach-Object { "$($_.Key): $($_.Value)`n" }) -join ""
         }
 
-        $header = $script:Config.Logging.LogHeaderFormat -f $timestamp, $LogName, $user, $runAsUser, $machineName, $osVersion, $hostApp, $processId, $psVersion, $psEdition, $psCompatibleVersions, $buildVersion, $clrVersion, $wsManStackVersion, $psRemotingProtocolVersion, $serializationVersion, $customFieldsString
+        $header = $script:Config.Logging.LogHeaderFormat -f $timestamp, $LogName, $user, $runAsUser, $machineName, $osVersion, $hostApp, $processId, $psVersion, $edition, $psCompatibleVersions, $buildVersion, $clrVersion, $wsManStackVersion, $psRemotingProtocolVersion, $serializationVersion, $customFieldsString
         $header | Out-File -FilePath $LogPath -Append
         Write-Verbose "Logging initialized. Log file: $($script:PSTaskLoggingState.LogPath)"
     }

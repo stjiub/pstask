@@ -11,12 +11,19 @@ function Write-PSTaskLog {
 
     .PARAMETER Level
     The log level for the message. Valid values are "INFO", "WARNING", and "ERROR". Default is "INFO".
+
+    .EXAMPLE
+    PS> Write-PSTaskLog "This text will be added to the log file"
+
+    .EXAMPLE
+    PS> Write-PSTaskLog -Level "Error" -Message "This is an error"
     #>
 
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
         [string]$Message,
+        
         [Parameter(Mandatory=$false)]
         [ValidateSet("INFO", "WARNING", "ERROR")]
         [string]$Level = "INFO"
