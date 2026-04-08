@@ -142,6 +142,11 @@ function Invoke-SpinnerTask {
             Write-PSTaskLog "TASK END - $Name - $status"
         }
 
+        # Show error message in console so the user can see why it failed
+        if ($taskError) {
+            Write-Host "  $($taskError.Exception.Message)" -ForegroundColor $script:Config.StatusColors.Failure
+        }
+
         # Re-throw after cleanup so parent tasks can catch the failure
         if ($StopOnFailure -and $taskError) {
             throw $taskError
