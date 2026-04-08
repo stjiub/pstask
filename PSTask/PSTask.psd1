@@ -69,9 +69,9 @@ RequiredModules = @('ThreadJob')
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = 'New-PSTask', 'Set-PSTaskMode', 'Set-PSTaskVisibilityLevel', 
-               'Show-PSTaskTree', 'Start-PSTaskLogging', 'Stop-PSTaskLogging', 
-               'Write-PSTaskLog'
+FunctionsToExport = 'New-PSTask', 'Set-PSTaskMode', 'Set-PSTaskVisibilityLevel',
+               'Set-PSTaskDebug', 'Show-PSTaskTree', 'Show-PSTaskLog',
+               'Start-PSTaskLogging', 'Stop-PSTaskLogging', 'Write-PSTaskLog'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
