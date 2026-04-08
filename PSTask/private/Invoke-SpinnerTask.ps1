@@ -15,6 +15,9 @@ function Invoke-SpinnerTask {
 
     .PARAMETER Indent
     The number of spaces to indent the task display.
+
+    .PARAMETER StopOnFailure
+    When specified, re-throws the error after displaying failure status to cascade the failure to parent tasks.
     #>
     
     [CmdletBinding()]
@@ -24,7 +27,9 @@ function Invoke-SpinnerTask {
         [Parameter(Mandatory = $true)]
         [scriptblock]$ScriptBlock,
         [Parameter(Mandatory = $false)]
-        [int]$Indent = 0
+        [int]$Indent = 0,
+        [Parameter(Mandatory = $false)]
+        [switch]$StopOnFailure
     )
 
     process {
@@ -49,6 +54,8 @@ function Invoke-SpinnerTask {
             }
             Name = $Name
         }
+
+        $taskError = $null
 
         try {
             # Write initial task name
@@ -107,6 +114,7 @@ function Invoke-SpinnerTask {
         }
         catch {
             $status = "Failure"
+            $taskError = $_
             $fullErrorMessage = Format-ErrorForLog $_
             if (![string]::IsNullOrWhiteSpace($fullErrorMessage)) {
                 Write-PSTaskLog $fullErrorMessage -Level "ERROR"
@@ -132,6 +140,11 @@ function Invoke-SpinnerTask {
             [Console]::CursorVisible = $originalCursorVisible
 
             Write-PSTaskLog "TASK END - $Name - $status"
+        }
+
+        # Re-throw after cleanup so parent tasks can catch the failure
+        if ($StopOnFailure -and $taskError) {
+            throw $taskError
         }
     }
 }

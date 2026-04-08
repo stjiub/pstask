@@ -12,12 +12,16 @@ function Invoke-TextTask {
 
     .PARAMETER ScriptBlock
     The script block containing the code to be executed as part of the task.
+
+    .PARAMETER StopOnFailure
+    When specified, re-throws the error after displaying failure status to cascade the failure to parent tasks.
     #>
     
     [CmdletBinding()]
     param(
         [string]$Name,
-        [scriptblock]$ScriptBlock
+        [scriptblock]$ScriptBlock,
+        [switch]$StopOnFailure
     )
 
     process {
@@ -45,6 +49,10 @@ function Invoke-TextTask {
             Write-Host $_.Exception.Message -ForegroundColor $script:Config.StatusColors.Failure
             Write-PSTaskLog $fullErrorMessage -Level "ERROR"
             Write-PSTaskLog "TASK END - $Name - Failure"
+
+            if ($StopOnFailure) {
+                throw
+            }
         }
     }
 }

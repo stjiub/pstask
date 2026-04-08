@@ -33,6 +33,7 @@ $script:PSTaskLoggingState = @{
     ReferenceCount = 0
 }
 $script:PSTaskNestingLevel = 0
+$script:PSTaskStopOnFailure = $false
 
 # Load main module config file
 $script:Config = Import-PowerShellDataFile -Path $script:ModuleConfigFile
