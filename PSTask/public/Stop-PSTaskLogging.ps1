@@ -40,6 +40,7 @@ function Stop-PSTaskLogging {
         if ($script:PSTaskLoggingState.ReferenceCount -le 0) {
             $script:PSTaskLoggingState.IsLogging = $false
             $logPath = $script:PSTaskLoggingState.LogPath
+            $script:PSTaskLoggingState.LastLogPath = $logPath
             $script:PSTaskLoggingState.LogPath = $null
             $script:PSTaskLoggingState.ReferenceCount = 0
     
