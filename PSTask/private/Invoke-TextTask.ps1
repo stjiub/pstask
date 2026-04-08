@@ -31,8 +31,10 @@ function Invoke-TextTask {
         Write-Host "- $Name" -ForegroundColor $script:Config.DefaultColor
         try {
             $output = . $ScriptBlock *>&1
+            $hasErrors = $false
             $output | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                    $hasErrors = $true
                     $fullErrorMessage = Format-ErrorForLog $_
                     Write-PSTaskLog $fullErrorMessage -Level "ERROR"
                     Write-Host $_.Exception.Message -ForegroundColor $script:Config.StatusColors.Failure
@@ -43,15 +45,20 @@ function Invoke-TextTask {
             }
             $taskTimer.Stop()
             $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
-            Write-Host "[OK] $Name ($durationText)" -ForegroundColor $script:Config.StatusColors.Success
-            Write-PSTaskLog "TASK END - $Name - Success ($durationText)"
+            if ($hasErrors) {
+                Write-Host "[!] $Name ($durationText)" -ForegroundColor $script:Config.StatusColors.Warning
+                Write-PSTaskLog "TASK END - $Name - Warning ($durationText)"
+            } else {
+                Write-Host "[OK] $Name ($durationText)" -ForegroundColor $script:Config.StatusColors.Success
+                Write-PSTaskLog "TASK END - $Name - Success ($durationText)"
+            }
         }
         catch {
-            $fullErrorMessage = Format-ErrorForLog $_
-            Write-Host "X $Name ($durationText)" -ForegroundColor $script:Config.StatusColors.Failure
-            Write-Host $_.Exception.Message -ForegroundColor $script:Config.StatusColors.Failure
             $taskTimer.Stop()
             $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
+            $fullErrorMessage = Format-ErrorForLog $_
+            Write-Host "[X] $Name ($durationText)" -ForegroundColor $script:Config.StatusColors.Failure
+            Write-Host $_.Exception.Message -ForegroundColor $script:Config.StatusColors.Failure
             Write-PSTaskLog $fullErrorMessage -Level "ERROR"
             Write-PSTaskLog "TASK END - $Name - Failure ($durationText)"
 

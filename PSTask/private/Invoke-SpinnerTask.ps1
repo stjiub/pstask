@@ -96,8 +96,10 @@ function Invoke-SpinnerTask {
             $output = . $ScriptBlock *>&1
 
             # Process output with null check and string validation
+            $hasErrors = $false
             $output | Where-Object { $_ -ne $null } | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                    $hasErrors = $true
                     $fullErrorMessage = Format-ErrorForLog $_
                     if (![string]::IsNullOrWhiteSpace($fullErrorMessage)) {
                         Write-PSTaskLog $fullErrorMessage -Level "ERROR"
@@ -110,8 +112,8 @@ function Invoke-SpinnerTask {
                     }
                 }
             }
-            
-            $status = "Success"
+
+            $status = if ($hasErrors) { "Warning" } else { "Success" }
         }
         catch {
             $status = "Failure"

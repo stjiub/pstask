@@ -28,8 +28,10 @@ function Invoke-NormalTask {
             $output = . $ScriptBlock *>&1
             
             # Process each output item
+            $hasErrors = $false
             $output | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                    $hasErrors = $true
                     $fullErrorMessage = Format-ErrorForLog $_
                     Write-PSTaskLog $fullErrorMessage -Level "ERROR"
                     # Write error to error stream
@@ -40,10 +42,11 @@ function Invoke-NormalTask {
                     $_
                 }
             }
-            
+
             $taskTimer.Stop()
             $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
-            Write-PSTaskLog "TASK END - $Name - Success ($durationText)"
+            $status = if ($hasErrors) { "Warning" } else { "Success" }
+            Write-PSTaskLog "TASK END - $Name - $status ($durationText)"
         }
         catch {
             $taskTimer.Stop()

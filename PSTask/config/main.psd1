@@ -10,11 +10,13 @@
     }
     StatusColors = @{
         Success = "Green"
+        Warning = "Yellow"
         Failure = "Red"
         Default = "White"
     }
     StatusChars = @{
         Success = "[OK]"
+        Warning = "[!]"
         Failure = "[X]"
         Default = "-"
     }
