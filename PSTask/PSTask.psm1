@@ -30,6 +30,7 @@ $script:PSTaskJobs = [hashtable]::Synchronized(@{
 $script:PSTaskLoggingState = @{
     IsLogging = $false
     LogPath = $null
+    LastLogPath = $null
     ReferenceCount = 0
 }
 $script:PSTaskNestingLevel = 0
