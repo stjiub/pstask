@@ -123,7 +123,9 @@ function New-PSTask {
             }
 
             $isVisible = $VisibilityLevel -ge $script:PSTaskVisibilityLevel
-            $effectiveMode = if ($isVisible) { $Mode } else { "Silent" }
+            $effectiveMode = if ($script:PSTaskDebugMode) { "Normal" }
+                             elseif ($isVisible) { $Mode }
+                             else { "Silent" }
 
             switch ($effectiveMode) {
                 "Spinner" {
