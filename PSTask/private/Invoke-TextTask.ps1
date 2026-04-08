@@ -25,6 +25,7 @@ function Invoke-TextTask {
     )
 
     process {
+        $taskTimer = [System.Diagnostics.Stopwatch]::StartNew()
         Write-PSTaskLog "TASK START - $Name"
 
         Write-Host "- $Name" -ForegroundColor $script:Config.DefaultColor
@@ -40,15 +41,19 @@ function Invoke-TextTask {
                     Write-Host $_
                 }
             }
-            Write-Host "[OK] $Name" -ForegroundColor $script:Config.StatusColors.Success
-            Write-PSTaskLog "TASK END - $Name - Success"
+            $taskTimer.Stop()
+            $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
+            Write-Host "[OK] $Name ($durationText)" -ForegroundColor $script:Config.StatusColors.Success
+            Write-PSTaskLog "TASK END - $Name - Success ($durationText)"
         }
         catch {
             $fullErrorMessage = Format-ErrorForLog $_
-            Write-Host "X $Name" -ForegroundColor $script:Config.StatusColors.Failure
+            Write-Host "X $Name ($durationText)" -ForegroundColor $script:Config.StatusColors.Failure
             Write-Host $_.Exception.Message -ForegroundColor $script:Config.StatusColors.Failure
+            $taskTimer.Stop()
+            $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
             Write-PSTaskLog $fullErrorMessage -Level "ERROR"
-            Write-PSTaskLog "TASK END - $Name - Failure"
+            Write-PSTaskLog "TASK END - $Name - Failure ($durationText)"
 
             if ($StopOnFailure) {
                 throw

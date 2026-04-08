@@ -21,6 +21,7 @@ function Invoke-SilentTask {
     )
 
     process {
+        $taskTimer = [System.Diagnostics.Stopwatch]::StartNew()
         Write-PSTaskLog "TASK START - $Name"
         try {
             $output = . $ScriptBlock *>&1
@@ -32,12 +33,16 @@ function Invoke-SilentTask {
                     Write-PSTaskLog $_.ToString()
                 }
             }
-            Write-PSTaskLog "TASK END - $Name - Success"
+            $taskTimer.Stop()
+            $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
+            Write-PSTaskLog "TASK END - $Name - Success ($durationText)"
         }
         catch {
+            $taskTimer.Stop()
+            $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
             $fullErrorMessage = Format-ErrorForLog $_
             Write-PSTaskLog $fullErrorMessage -Level "ERROR"
-            Write-PSTaskLog "TASK END - $Name - Failure"
+            Write-PSTaskLog "TASK END - $Name - Failure ($durationText)"
             throw
         }
     }
