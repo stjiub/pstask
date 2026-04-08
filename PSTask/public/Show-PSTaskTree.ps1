@@ -78,7 +78,7 @@
                 $nestingStack.Push($task)
                 $currentNesting++
             }
-            elseif ($_ -match "\[(.*?)\] \[INFO\] TASK END - (.*) - (.*)") {
+            elseif ($_ -match "\[(.*?)\] \[INFO\] TASK END - (.*) - (Success|Failure)") {
                 $timestamp = [datetime]::ParseExact($matches[1], "yyyy-MM-dd HH:mm:ss", $null)
                 $taskName = $matches[2]
                 $status = $matches[3]

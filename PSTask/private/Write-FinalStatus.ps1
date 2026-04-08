@@ -14,13 +14,17 @@ function Write-FinalStatus {
 
     .PARAMETER Indent
     The number of spaces to indent the status message. Default is 0.
+
+    .PARAMETER Duration
+    Optional elapsed time for the task, displayed after the task name.
     #>
 
     [CmdletBinding()]
     param(
         [string]$Name,
         [string]$Status,
-        [int]$Indent = 0
+        [int]$Indent = 0,
+        [System.TimeSpan]$Duration
     )
 
     process {
@@ -30,15 +34,20 @@ function Write-FinalStatus {
         } else {
             $char = $script:Config.StatusChars.Default
         }
-        
+
         if ($script:Config.StatusColors.$Status) {
             $statusColorName = $script:Config.StatusColors.$Status
         } else {
             $statusColorName = $script:Config.StatusColors.Default
         }
-        
+
         $statusColor = [System.ConsoleColor]::$statusColorName
 
-        [ConsoleBufferWriter]::WriteTextAtPosition("$char $Name", $taskPosition.X + $Indent, $taskPosition.Y, $statusColor)
+        $durationText = ""
+        if ($Duration) {
+            $durationText = " ({0:N1}s)" -f $Duration.TotalSeconds
+        }
+
+        [ConsoleBufferWriter]::WriteTextAtPosition("$char $Name$durationText", $taskPosition.X + $Indent, $taskPosition.Y, $statusColor)
     }
 }

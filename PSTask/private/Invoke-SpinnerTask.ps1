@@ -33,6 +33,7 @@ function Invoke-SpinnerTask {
     )
 
     process {
+        $taskTimer = [System.Diagnostics.Stopwatch]::StartNew()
         Write-PSTaskLog "TASK START - $Name"
 
         # Save current cursor state
@@ -131,7 +132,8 @@ function Invoke-SpinnerTask {
             }
 
             # Write final status
-            Write-FinalStatus -Name $Name -Status $status -Indent $Indent
+            $taskTimer.Stop()
+            Write-FinalStatus -Name $Name -Status $status -Indent $Indent -Duration $taskTimer.Elapsed
 
             # Remove task from collection
             $script:PSTaskJobs.Tasks.Remove($taskId)
@@ -139,7 +141,8 @@ function Invoke-SpinnerTask {
             # Restore cursor visibility
             [Console]::CursorVisible = $originalCursorVisible
 
-            Write-PSTaskLog "TASK END - $Name - $status"
+            $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
+            Write-PSTaskLog "TASK END - $Name - $status ($durationText)"
         }
 
         # Show error message in console so the user can see why it failed

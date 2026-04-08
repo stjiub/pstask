@@ -21,6 +21,7 @@ function Invoke-NormalTask {
     )
     
     process {
+        $taskTimer = [System.Diagnostics.Stopwatch]::StartNew()
         Write-PSTaskLog "TASK START - $Name"
         try {
             # Execute the script block and capture output
@@ -40,12 +41,16 @@ function Invoke-NormalTask {
                 }
             }
             
-            Write-PSTaskLog "TASK END - $Name - Success"
+            $taskTimer.Stop()
+            $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
+            Write-PSTaskLog "TASK END - $Name - Success ($durationText)"
         }
         catch {
+            $taskTimer.Stop()
+            $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
             $fullErrorMessage = Format-ErrorForLog $_
             Write-PSTaskLog $fullErrorMessage -Level "ERROR"
-            Write-PSTaskLog "TASK END - $Name - Failure"
+            Write-PSTaskLog "TASK END - $Name - Failure ($durationText)"
             throw  # Re-throw the error to maintain normal PowerShell error handling
         }
     }
