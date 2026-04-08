@@ -31,6 +31,11 @@ function New-PSTask {
     .PARAMETER CustomFields
     A hashtable of custom fields to be added to the log header.
 
+    .PARAMETER StopOnFailure
+    When specified, a task failure will re-throw the error after displaying the failure status,
+    causing parent tasks to stop executing subsequent child tasks. This enables cascading failure
+    behavior where one failed task halts the entire pipeline.
+
     .EXAMPLE
     New-PSTask -Name "Initialize System" -ScriptBlock { Initialize-System } -LogName $MyInvocation.MyCommand.Name
     # This example creates a new task named "Initialize System" with the default Spinner output mode and logs it.
@@ -89,10 +94,22 @@ function New-PSTask {
         [string]$LogPath,
 
         [Parameter(Mandatory=$false)]
-        [hashtable]$CustomFields
+        [hashtable]$CustomFields,
+
+        [Parameter(Mandatory=$false)]
+        [switch]$StopOnFailure
     )
     
     process {
+        # Determine effective StopOnFailure: explicit parameter OR inherited from parent
+        $effectiveStopOnFailure = $StopOnFailure -or $script:PSTaskStopOnFailure
+        $previousStopOnFailure = $script:PSTaskStopOnFailure
+
+        # Propagate to child tasks if this task has StopOnFailure
+        if ($effectiveStopOnFailure) {
+            $script:PSTaskStopOnFailure = $true
+        }
+
         try {
             $script:PSTaskNestingLevel++
 
@@ -109,18 +126,21 @@ function New-PSTask {
             $effectiveMode = if ($isVisible) { $Mode } else { "Silent" }
 
             switch ($effectiveMode) {
-                "Spinner" { 
+                "Spinner" {
                     # Calculate intent level
                     $indentLevel = [Math]::Min($script:PSTaskNestingLevel - 1, $script:Config.MaxIndentationLevel)
                     $indent = $indentLevel * 4  # 4 spaces per indentation level
-                    Invoke-SpinnerTask -Name $Name -ScriptBlock $ScriptBlock -Indent $indent
+                    Invoke-SpinnerTask -Name $Name -ScriptBlock $ScriptBlock -Indent $indent -StopOnFailure:$effectiveStopOnFailure
                 }
-                "Text" { Invoke-TextTask -Name $Name -ScriptBlock $ScriptBlock }
+                "Text" { Invoke-TextTask -Name $Name -ScriptBlock $ScriptBlock -StopOnFailure:$effectiveStopOnFailure }
                 "Normal" { Invoke-NormalTask -Name $Name -ScriptBlock $ScriptBlock }
                 "Silent" { Invoke-SilentTask -Name $Name -ScriptBlock $ScriptBlock }
             }
         }
         finally {
+            # Restore previous StopOnFailure state so sibling scopes aren't affected
+            $script:PSTaskStopOnFailure = $previousStopOnFailure
+
             # Decrease the reference count or stop logging if this task initialized it
             if ($loggingInitialized) {
                 Stop-PSTaskLogging
