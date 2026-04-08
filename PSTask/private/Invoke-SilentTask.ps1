@@ -25,8 +25,10 @@ function Invoke-SilentTask {
         Write-PSTaskLog "TASK START - $Name"
         try {
             $output = . $ScriptBlock *>&1
+            $hasErrors = $false
             $output | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                    $hasErrors = $true
                     $fullErrorMessage = Format-ErrorForLog $_
                     Write-PSTaskLog $fullErrorMessage -Level "ERROR"
                 } else {
@@ -35,7 +37,8 @@ function Invoke-SilentTask {
             }
             $taskTimer.Stop()
             $durationText = "{0:N1}s" -f $taskTimer.Elapsed.TotalSeconds
-            Write-PSTaskLog "TASK END - $Name - Success ($durationText)"
+            $status = if ($hasErrors) { "Warning" } else { "Success" }
+            Write-PSTaskLog "TASK END - $Name - $status ($durationText)"
         }
         catch {
             $taskTimer.Stop()

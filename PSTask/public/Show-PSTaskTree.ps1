@@ -78,7 +78,7 @@
                 $nestingStack.Push($task)
                 $currentNesting++
             }
-            elseif ($_ -match "\[(.*?)\] \[INFO\] TASK END - (.*) - (Success|Failure)") {
+            elseif ($_ -match "\[(.*?)\] \[INFO\] TASK END - (.*) - (Success|Warning|Failure)") {
                 $timestamp = [datetime]::ParseExact($matches[1], "yyyy-MM-dd HH:mm:ss", $null)
                 $taskName = $matches[2]
                 $status = $matches[3]
@@ -100,12 +100,8 @@
             param($Task, $Prefix = "")
             
             $duration = $Task.EndTime - $Task.StartTime
-            $statusSymbol = if ($Task.Status -eq "Success") { $script:Config.StatusChars.Success } else { $script.Config.StatusChars.Failure }
-            $statusColor = if ($Task.Status -eq "Success") { 
-                $script:Config.StatusColors.Success 
-            } else { 
-                $script:Config.StatusColors.Failure 
-            }
+            $statusSymbol = if ($script:Config.StatusChars.($Task.Status)) { $script:Config.StatusChars.($Task.Status) } else { $script:Config.StatusChars.Default }
+            $statusColor = if ($script:Config.StatusColors.($Task.Status)) { $script:Config.StatusColors.($Task.Status) } else { $script:Config.StatusColors.Default }
             
             $line = "{0}{1} [{2:N1}s] {3}" -f $Prefix, $Task.Name, $duration.TotalSeconds, $statusSymbol
             Write-Host $line -ForegroundColor $statusColor

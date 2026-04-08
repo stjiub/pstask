@@ -103,6 +103,9 @@ function Show-PSTaskLog {
                 elseif ($message -match "^TASK END - .* - Success") {
                     Write-Host $line -ForegroundColor Green
                 }
+                elseif ($message -match "^TASK END - .* - Warning") {
+                    Write-Host $line -ForegroundColor Yellow
+                }
                 elseif ($message -match "^TASK END - .* - Failure") {
                     Write-Host $line -ForegroundColor Red
                 }
