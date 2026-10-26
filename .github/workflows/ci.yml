@@ -21,7 +21,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module Pester -MinimumVersion 5.5 -Force -SkipPublisherCheck -Scope CurrentUser
           Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
           if ($PSVersionTable.PSEdition -eq 'Desktop') { Install-Module ThreadJob -Force -Scope CurrentUser }
