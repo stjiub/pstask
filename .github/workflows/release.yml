@@ -21,8 +21,15 @@ jobs:
       - name: Install dependencies
         shell: pwsh
         run: |
-          Install-Module Pester -MinimumVersion 5.5 -Force -SkipPublisherCheck -Scope CurrentUser
-          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          function Install-Retry {
+            param([string]$Name, [hashtable]$Params = @{})
+            for ($i = 1; $i -le 3; $i++) {
+              try { Install-Module -Name $Name @Params -Force -Scope CurrentUser -ErrorAction Stop; return }
+              catch { if ($i -eq 3) { throw }; Start-Sleep -Seconds (5 * $i) }
+            }
+          }
+          Install-Retry Pester @{ MinimumVersion = '5.5'; SkipPublisherCheck = $true }
+          Install-Retry PSScriptAnalyzer
 
       - name: Publish to the PowerShell Gallery
         shell: pwsh
