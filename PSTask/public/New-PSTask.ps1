@@ -4,7 +4,7 @@ function New-PSTask {
     Creates and executes a new task with various output modes and logging capabilities.
 
     .DESCRIPTION
-    The New-PSTask function allows you to create and execute tasks with different output modes (Spinner, Text, Verbose, Silent).
+    The New-PSTask function allows you to create and execute tasks with different output modes (Spinner, Text, Normal, Silent).
     It provides logging capabilities and can be customized using a configuration file. The function supports nested tasks
     and adjusts indentation accordingly. It also respects the visibility level set for PSTask operations.
 
@@ -15,7 +15,7 @@ function New-PSTask {
     The script block containing the code to be executed as part of the task.
 
     .PARAMETER Mode
-    The output mode for the task. Valid values are "Spinner", "Text", "Verbose", and "Silent". 
+    The output mode for the task. Valid values are "Spinner", "Text", "Normal", and "Silent". 
     Default is the value specified in $script:Config.DefaultMode.
 
     .PARAMETER VisibilityLevel
@@ -126,6 +126,11 @@ function New-PSTask {
             $effectiveMode = if ($script:PSTaskDebugMode) { "Normal" }
                              elseif ($isVisible) { $Mode }
                              else { "Silent" }
+
+            # Spinner needs a real console to position the cursor
+            if ($effectiveMode -eq "Spinner" -and [Console]::IsOutputRedirected) {
+                $effectiveMode = "Text"
+            }
 
             switch ($effectiveMode) {
                 "Spinner" {
