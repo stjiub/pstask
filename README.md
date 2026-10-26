@@ -127,6 +127,14 @@ Provision workstation [1.0s] [OK]
 
 Durations in the tree come from log timestamps, which have one-second resolution. Task names are used as keys, so give sibling tasks distinct names.
 
+## Demo
+
+`examples/Demo.ps1` runs a harmless provisioning script with nested tasks, a warning, a failure and a `-StopOnFailure` cascade, then prints the task tree. Run it in an interactive console to see the spinner:
+
+```powershell
+./examples/Demo.ps1
+```
+
 ## Commands
 
 | Command | Purpose |
