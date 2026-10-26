@@ -8,7 +8,7 @@
     execution time, and status for all tasks that were run.
     
     .PARAMETER LogPath
-    The path to the log file to analyze. If not specified, uses the current log if logging is active.
+    The path to the log file to analyze. If not specified, uses the active log, or the last completed log.
     
     .EXAMPLE
     Show-PSTaskTree
@@ -25,7 +25,7 @@
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false)]
-        [string]$LogPath = $script:PSTaskLoggingState.LogPath
+        [string]$LogPath
     )
     
     begin {
@@ -39,6 +39,10 @@
     }
     
     process {
+        if (-not $LogPath) {
+            $LogPath = if ($script:PSTaskLoggingState.IsLogging) { $script:PSTaskLoggingState.LogPath } else { $script:PSTaskLoggingState.LastLogPath }
+        }
+
         if (-not $LogPath) {
             Write-Warning "No log file available to analyze"
             return
@@ -95,29 +99,26 @@
             }
         }
         
-        # Helper function to print tree
-        function Print-TaskNode {
-            param($Task, $Prefix = "")
-            
+        function Write-TaskNode {
+            param($Task, $Prefix = "", $Connector = "")
+
             $duration = $Task.EndTime - $Task.StartTime
             $statusSymbol = if ($script:Config.StatusChars.($Task.Status)) { $script:Config.StatusChars.($Task.Status) } else { $script:Config.StatusChars.Default }
             $statusColor = if ($script:Config.StatusColors.($Task.Status)) { $script:Config.StatusColors.($Task.Status) } else { $script:Config.StatusColors.Default }
-            
-            $line = "{0}{1} [{2:N1}s] {3}" -f $Prefix, $Task.Name, $duration.TotalSeconds, $statusSymbol
+
+            $line = "{0}{1}{2} [{3:N1}s] {4}" -f $Prefix, $Connector, $Task.Name, $duration.TotalSeconds, $statusSymbol
             Write-Host $line -ForegroundColor $statusColor
-            
+
+            $childPrefix = if (-not $Connector) { $Prefix } elseif ($Connector -eq $chars.Corner) { $Prefix + $chars.Space } else { $Prefix + $chars.Vertical }
             for ($i = 0; $i -lt $Task.Children.Count; $i++) {
-                $child = $Task.Children[$i]
                 $isLast = ($i -eq $Task.Children.Count - 1)
-                $newPrefix = $Prefix + $(if ($isLast) { $chars.Space } else { $chars.Vertical })
-                $connector = if ($isLast) { $chars.Corner } else { $chars.Branch }
-                Print-TaskNode -Task $child -Prefix ($newPrefix + $connector)
+                $childConnector = if ($isLast) { $chars.Corner } else { $chars.Branch }
+                Write-TaskNode -Task $Task.Children[$i] -Prefix $childPrefix -Connector $childConnector
             }
         }
-        
-        # Print the tree
+
         $rootTasks | ForEach-Object {
-            Print-TaskNode $_
+            Write-TaskNode $_
         }
     }
 }
