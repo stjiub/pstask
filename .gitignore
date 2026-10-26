@@ -1,1 +1,14 @@
-tools/config.psd1
+# Build and test output
+TestResults/
+coverage.xml
+*.nupkg
+
+# Logs written by PSTask while experimenting
+*.log
+
+# Editor
+.vscode/
+.idea/
+
+# Local config
+config.local.psd1
