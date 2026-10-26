@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    name: Test (${{ matrix.shell }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [pwsh, powershell]
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -MinimumVersion 5.5 -Force -SkipPublisherCheck -Scope CurrentUser
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          if ($PSVersionTable.PSEdition -eq 'Desktop') { Install-Module ThreadJob -Force -Scope CurrentUser }
+
+      - name: Analyze and test
+        run: ./build.ps1 -Task Test -Coverage
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.shell }}
+          path: |
+            TestResults/
+            coverage.xml
