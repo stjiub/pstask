@@ -5,21 +5,6 @@
 
 Run PowerShell script blocks as named **tasks**. PSTask shows a live spinner while each task runs, turns it into a pass/warn/fail line when it finishes, supports nested tasks, and writes a structured log you can read back later.
 
-```
-- Provision workstation
-- Create local account
-[OK] Create local account (0.3s)
-- Install software
-Package 2 of 3 skipped
-[!] Install software (0.5s)
-- Join domain
-[X] Join domain (0.0s)
-Domain controller unreachable
-[OK] Provision workstation (0.9s)
-```
-
-> Output above is `Text` mode. In `Spinner` mode (the default in an interactive console) each line is a single row that animates, then resolves to `[OK]`, `[!]` or `[X]` in green, yellow or red.
-
 ## Requirements
 
 - Windows PowerShell 5.1 or PowerShell 7+ on Windows
@@ -166,8 +151,6 @@ Install-Module Pester -MinimumVersion 5.5, PSScriptAnalyzer -Scope CurrentUser
 ```
 
 The live-cursor Spinner code needs an interactive console and is not covered by the automated tests. See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-Releases are published to the PowerShell Gallery when a `v<version>` tag matching `ModuleVersion` is pushed.
 
 ## License
 
