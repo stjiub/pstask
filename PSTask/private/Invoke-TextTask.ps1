@@ -28,7 +28,7 @@ function Invoke-TextTask {
         $taskTimer = [System.Diagnostics.Stopwatch]::StartNew()
         Write-PSTaskLog "TASK START - $Name"
 
-        Write-Host "- $Name" -ForegroundColor $script:Config.DefaultColor
+        Write-Host "- $Name" -ForegroundColor $script:Config.TaskColor
         try {
             $output = . $ScriptBlock *>&1
             $hasErrors = $false
