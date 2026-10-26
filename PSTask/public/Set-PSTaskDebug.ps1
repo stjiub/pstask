@@ -1,4 +1,4 @@
-function Set-PSTaskDebug {
+﻿function Set-PSTaskDebug {
     <#
     .SYNOPSIS
     Enables or disables PSTask debug mode.
@@ -24,6 +24,7 @@ function Set-PSTaskDebug {
     # Restores configured mode behavior.
     #>
 
+    [Diagnostics.CodeAnalysis.SuppressMessage('PSReviewUnusedParameter', '', Justification = 'Switches select the parameter set')]
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true, ParameterSetName = "Enable")]
@@ -34,7 +35,7 @@ function Set-PSTaskDebug {
     )
 
     process {
-        if ($Enabled) {
+        if ($PSCmdlet.ParameterSetName -eq 'Enable') {
             $script:PSTaskDebugMode = $true
             Write-Verbose "PSTask debug mode enabled. All tasks will use Normal mode."
         }
