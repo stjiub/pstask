@@ -40,7 +40,18 @@ function Invoke-SpinnerTask {
         $originalCursorVisible = [Console]::CursorVisible
         [Console]::CursorVisible = $false
 
-        # Get current cursor position
+        # The task name and its output each need a row, so scroll first if the cursor is on the last row
+        $cursor = $Host.UI.RawUI.CursorPosition
+        if ($cursor.Y -ge [Console]::BufferHeight - 1) {
+            [Console]::WriteLine()
+            [Console]::SetCursorPosition($cursor.X, [Console]::BufferHeight - 2)
+
+            # Scrolling moved every running parent task up a row
+            foreach ($activeTask in @($script:PSTaskJobs.Tasks.Values)) {
+                $activeTask.Position.Y--
+            }
+        }
+
         $taskPosition = $Host.UI.RawUI.CursorPosition
 
         # Generate unique ID for this task
@@ -132,6 +143,9 @@ function Invoke-SpinnerTask {
                 Stop-Job -Job $spinnerJob -ErrorAction SilentlyContinue
                 Remove-Job -Job $spinnerJob -ErrorAction SilentlyContinue
             }
+
+            # The buffer may have scrolled while child tasks ran, so use the task's current row
+            $taskPosition = [System.Management.Automation.Host.Coordinates]::new($taskPosition.X, $script:PSTaskJobs.Tasks[$taskId].Position.Y)
 
             # Write final status
             $taskTimer.Stop()
