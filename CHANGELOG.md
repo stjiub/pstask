@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.1
 
 - Fix: Spinner mode threw "SetCursorPosition ... Actual value was N" when the cursor was on the last row of the console buffer, and nested tasks drew on the wrong rows after the screen scrolled
 

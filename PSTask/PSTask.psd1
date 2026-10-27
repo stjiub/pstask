@@ -1,6 +1,6 @@
 @{
     RootModule            = 'PSTask.psm1'
-    ModuleVersion         = '0.3.0'
+    ModuleVersion         = '0.3.1'
     GUID                  = '0bd4f84a-fde9-44ca-90d1-6c10b44b2e30'
     Author                = 'stjiub'
     Copyright             = '(c) 2024 stjiub. All rights reserved.'
