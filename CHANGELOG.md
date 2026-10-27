@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fix: Spinner mode threw "SetCursorPosition ... Actual value was N" when the cursor was on the last row of the console buffer, and nested tasks drew on the wrong rows after the screen scrolled
+
 ## 0.3.0
 
 - Fix: Text mode failed because it read a color setting that did not exist
